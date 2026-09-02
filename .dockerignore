@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+ml/data/
+.git/
+frontend/node_modules/
+*.csv
+.dockerignore
+Dockerfile
