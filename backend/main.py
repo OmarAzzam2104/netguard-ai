@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import joblib
 import numpy as np
-
+from backend.database import SessionLocal, Detection
 app = FastAPI()
 
 # Load model + feature order once at startup
@@ -52,6 +52,21 @@ def predict(data: FlowData):
 
     # Translate the 0/1 back into a human-readable label
     label = "ATTACK" if prediction == 1 else "BENIGN"
+
+
+     # --- Save this detection to the database ---
+    db = SessionLocal()                      # open a conversation with the DB
+    try:
+        record = Detection(                  # build a row as a Python object
+            prediction=label,
+            is_attack=bool(prediction == 1),
+            confidence=round(float(probability[prediction]), 4)
+        )
+        db.add(record)                       # stage the row
+        db.commit()                          # actually write it to the database
+    finally:
+        db.close() 
+
 
     return {
         "prediction": label,
