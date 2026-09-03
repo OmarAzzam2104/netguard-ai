@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import joblib
 import numpy as np
 from backend.database import SessionLocal, Detection
+from sqlalchemy import func
 app = FastAPI()
 
 # Load model + feature order once at startup
@@ -73,3 +74,20 @@ def predict(data: FlowData):
         "is_attack": bool(prediction == 1),
         "confidence": round(float(probability[prediction]), 4)
     }
+
+@app.get("/stats")
+def get_stats():
+    db = SessionLocal()
+    try:
+        total = db.query(func.count(Detection.id)).scalar()
+        attacks = db.query(func.count(Detection.id)).filter(Detection.is_attack == True).scalar()
+        benign = total - attacks
+        attack_rate = round((attacks / total) * 100, 2) if total > 0 else 0
+        return {
+            "total_detections": total,
+            "attacks": attacks,
+            "benign": benign,
+            "attack_rate_percent": attack_rate
+        }
+    finally:
+        db.close()
