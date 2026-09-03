@@ -2,9 +2,12 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import joblib
 import numpy as np
+import json
+import random
 from backend.database import SessionLocal, Detection
 from sqlalchemy import func
 from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -16,6 +19,9 @@ app.add_middleware(
 # Load model + feature order once at startup
 model = joblib.load("ml/models/netguard_model.joblib")
 feature_columns = joblib.load("ml/models/feature_columns.joblib")
+# Load pre-selected sample flows once at startup (for the interactive demo)
+with open("backend/samples.json") as f:
+    SAMPLE_FLOWS = json.load(f)
 
 # ----------------------------------------------------------------------
 # Define the SHAPE of valid input using a Pydantic model.
@@ -98,3 +104,11 @@ def get_stats():
         }
     finally:
         db.close()
+@app.get("/sample/{flow_type}")
+def get_sample(flow_type: str):
+    # flow_type must be "attack" or "benign"
+    if flow_type not in SAMPLE_FLOWS:
+        raise HTTPException(status_code=400, detail="flow_type must be 'attack' or 'benign'")
+    # Pick a random sample of that type and return its 78 features
+    features = random.choice(SAMPLE_FLOWS[flow_type])
+    return {"features": features}
