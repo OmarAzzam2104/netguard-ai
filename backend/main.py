@@ -4,8 +4,15 @@ import joblib
 import numpy as np
 from backend.database import SessionLocal, Detection
 from sqlalchemy import func
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Load model + feature order once at startup
 model = joblib.load("ml/models/netguard_model.joblib")
 feature_columns = joblib.load("ml/models/feature_columns.joblib")
