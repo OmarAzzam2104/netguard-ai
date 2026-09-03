@@ -3,7 +3,17 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 # The connection string: tells SQLAlchemy exactly how to reach the database.
 # Format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME
-DATABASE_URL = "postgresql://postgres:netguard123@localhost:5432/netguard"
+import os
+
+# Read database settings from environment variables, with local-dev defaults.
+# The secret (password) is NOT hardcoded — it comes from the environment.
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "netguard123")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "netguard")
+
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # The engine is the core connection to the database.
 engine = create_engine(DATABASE_URL)
