@@ -1,0 +1,29 @@
+name: Security Scan
+
+# WHEN: run on every push and pull request to the main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  bandit:
+    # WHERE: run on a fresh Ubuntu machine provided by GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+      # WHAT: the sequence of steps to perform
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit security scan
+        run: bandit -r backend ml -ll
