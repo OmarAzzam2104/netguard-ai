@@ -26,10 +26,11 @@ The trained model is served through a REST API. Every prediction is stored in a 
 | 2 | ML model — Random Forest on CICIDS2017 | Done |
 | 3 | FastAPI backend (/predict, /health, /stats) | Done |
 | 4 | PostgreSQL persistence (SQLAlchemy ORM) | Done |
-| 5 | React dashboard with live stat cards + donut chart | Done |
+| 5 | React dashboard: live stats, donut chart, interactive model test | Done |
 | 6 | Docker containerization (backend + database) | Done |
 | 7 | AWS deployment (EC2, S3, RDS — free tier) | Planned |
 | 8 | CI/CD with GitHub Actions + Bandit security scan | Planned |
+
 
 ---
 
@@ -88,6 +89,7 @@ On the held-out test set the Random Forest achieves an F1 score of ~0.99 for att
 | GET  | /health  | Confirms the model loaded and reports the expected feature count |
 | POST | /predict | Accepts 78 flow features as JSON, classifies, stores the result, returns prediction + confidence |
 | GET  | /stats   | Returns aggregate detection statistics from the database |
+| GET  | /sample/{type}   | Returns a real sample flow ("attack" or "benign") for the live demo |
 
 The backend loads the trained model once at startup (not per request) for performance, and validates incoming requests against a Pydantic schema so malformed input is rejected before it reaches the model. Predictions are persisted with the SQLAlchemy ORM, which parameterizes queries (mitigating SQL injection).
 
@@ -174,7 +176,7 @@ README.md
 
 ## Roadmap
 
-- Interactive "test the model" demo on the dashboard (submit a flow, get a verdict)
+
 - Deploy to AWS free tier (EC2 + RDS + S3)
 - CI/CD pipeline with GitHub Actions, including a Bandit security scan
 - Multiclass classification (identify the specific attack type)
